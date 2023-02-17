@@ -29,10 +29,10 @@ namespace CursoOnline.DomainTest.Cursos
 
     public class Curso
     {
-        public string Nome { get; set; }
-        public double CargaHoraria { get; set; }
-        public string PublicoAlvo { get; set; }
-        public double Valor { get; set; }
+        public string Nome { get; private set; }
+        public double CargaHoraria { get; private set; }
+        public string PublicoAlvo { get; private set; }
+        public double Valor { get; private set; }
 
         public Curso(string nome, double cargaHoraria, string publicoAlvo, double valor)
         {
