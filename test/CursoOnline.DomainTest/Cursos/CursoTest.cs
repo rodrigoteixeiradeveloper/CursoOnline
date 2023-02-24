@@ -1,4 +1,5 @@
-﻿using CursoOnline.DomainTest._Builders;
+﻿using Bogus;
+using CursoOnline.DomainTest._Builders;
 using CursoOnline.DomainTest._Utils;
 using ExpectedObjects;
 using Xunit.Abstractions;
@@ -19,11 +20,13 @@ namespace CursoOnline.DomainTest.Cursos
             _outputHelper = outputHelper;
             _outputHelper.WriteLine("Construtor sendo executado");
 
-            _nome = "Informática Básica";
-            _descricao = "Descrição";
-            _cargaHoraria = (double)80;
+            var faker = new Faker();
+
+            _nome = faker.Random.Word();
+            _descricao = faker.Lorem.Paragraph();
+            _cargaHoraria = faker.Random.Double(50,100);
             _publicoAlvo = PublicoAlvo.Estudante;
-            _valor = (double)950;
+            _valor = faker.Random.Double(500, 1000);
         }
 
         public void Dispose()
