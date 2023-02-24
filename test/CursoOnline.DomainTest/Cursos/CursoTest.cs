@@ -1,24 +1,18 @@
-﻿using CursoOnline.DomainTest._Utils;
+﻿using CursoOnline.DomainTest._Builders;
+using CursoOnline.DomainTest._Utils;
 using ExpectedObjects;
-using Microsoft.VisualStudio.TestPlatform.Common.Telemetry;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit.Abstractions;
 
 namespace CursoOnline.DomainTest.Cursos
 {
-    public class CursoTest
+    public class CursoTest : IDisposable
     {
         private readonly ITestOutputHelper _outputHelper;
         private readonly string _nome;
+        private readonly string _descricao;
         private readonly double _cargaHoraria;
         private readonly PublicoAlvo _publicoAlvo;
         private readonly double _valor;
-
 
         public CursoTest(ITestOutputHelper outputHelper)
         {
@@ -26,9 +20,15 @@ namespace CursoOnline.DomainTest.Cursos
             _outputHelper.WriteLine("Construtor sendo executado");
 
             _nome = "Informática Básica";
+            _descricao = "Descrição";
             _cargaHoraria = (double)80;
             _publicoAlvo = PublicoAlvo.Estudante;
             _valor = (double)950;
+        }
+
+        public void Dispose()
+        {
+            _outputHelper.WriteLine("Construtor sendo executado");
         }
 
         [Fact]
@@ -40,9 +40,10 @@ namespace CursoOnline.DomainTest.Cursos
                 CargaHoraria = _cargaHoraria,
                 PublicoAlvo = _publicoAlvo,
                 Valor = _valor,
+                Descricao = _descricao,
             };
 
-            var curso = new Curso(cursoEsperado.Nome, cursoEsperado.CargaHoraria, cursoEsperado.PublicoAlvo, cursoEsperado.Valor);
+            var curso = new Curso(cursoEsperado.Nome, cursoEsperado.Descricao, cursoEsperado.CargaHoraria, cursoEsperado.PublicoAlvo, cursoEsperado.Valor);
 
             cursoEsperado.ToExpectedObject().ShouldMatch(curso);
         }
@@ -52,7 +53,7 @@ namespace CursoOnline.DomainTest.Cursos
         [InlineData(null)]
         public void NaoDeveCursoTerUmNomeInvalido(string nomeInvalido)
         {
-            Assert.Throws<ArgumentException>(() => new Curso(nomeInvalido, _cargaHoraria, _publicoAlvo, _valor))
+            Assert.Throws<ArgumentException>(() => CursoBuilder.Novo().ComNome(nomeInvalido).Build())
                 .ComMensagem("Nome inválido");
         }
 
@@ -62,7 +63,7 @@ namespace CursoOnline.DomainTest.Cursos
         [InlineData(-12)]
         public void NaoDeveCursoTerCargaHorariaMenosQueUm(double cargaHorariaInvalida)
         {
-            Assert.Throws<ArgumentException>(() => new Curso(_nome, cargaHorariaInvalida, _publicoAlvo, _valor))
+            Assert.Throws<ArgumentException>(() => CursoBuilder.Novo().ComCargaHoraria(cargaHorariaInvalida).Build())
                 .ComMensagem("Carga Horaria Inválida");
         }
 
@@ -71,9 +72,11 @@ namespace CursoOnline.DomainTest.Cursos
         [InlineData(-12)]
         public void NaoDeveCursoTerValorMenosQueUm(double valorInvalida)
         {
-            Assert.Throws<ArgumentException>(() => new Curso(_nome, _cargaHoraria, _publicoAlvo, valorInvalida))
+            Assert.Throws<ArgumentException>(() => CursoBuilder.Novo().ComValor(valorInvalida).Build())
                 .ComMensagem("Valor Inválido");
         }
+
+        
     }
 
     public enum PublicoAlvo
@@ -87,12 +90,13 @@ namespace CursoOnline.DomainTest.Cursos
     public class Curso
     {
         public string Nome { get; private set; }
+        public string Descricao { get; private set; }
         public double CargaHoraria { get; private set; }
         public PublicoAlvo PublicoAlvo { get; private set; }
         public double Valor { get; private set; }
 
 
-        public Curso(string nome, double cargaHoraria, PublicoAlvo publicoAlvo, double valor)
+        public Curso(string nome, string descricao, double cargaHoraria, PublicoAlvo publicoAlvo, double valor)
         {
             if (string.IsNullOrEmpty(nome))
                 throw new ArgumentException("Nome inválido");
@@ -107,6 +111,7 @@ namespace CursoOnline.DomainTest.Cursos
             CargaHoraria = cargaHoraria;
             PublicoAlvo = publicoAlvo;
             Valor = valor;
+            Descricao = descricao;
         }
     }
 }
