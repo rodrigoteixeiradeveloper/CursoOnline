@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using CursoOnline.Domain.Cursos;
+using CursoOnline.DomainTest._Builders;
 using CursoOnline.DomainTest._Utils;
 using Moq;
 
@@ -52,41 +53,17 @@ namespace CursoOnline.DomainTest.Cursos
             Assert.Throws<ArgumentException>(() => _armazenadorCurso.Armazenar(_cursoDto))
                 .ComMensagem("Público alvo innválido");
         }
-    }
 
-    public interface ICursoRepositorio
-    {
-        void Adicionar(Curso curso);
-    }
-
-    public class ArmazenadorCurso
-    {
-        private readonly ICursoRepositorio _cursoRepositorio;
-
-        public ArmazenadorCurso(ICursoRepositorio cursoRepositorio)
+        [Fact]
+        public void NaoDeveAdicionarCursoComNomesRepetidos()
         {
-            this._cursoRepositorio = cursoRepositorio;
-        }
+            var cursoJaSalvo = CursoBuilder.Novo().ComNome(_cursoDto.Nome).Build();
+            _cursoRepositorioMock.Setup(r => r.ObterPeloNome(_cursoDto.Nome)).Returns(cursoJaSalvo);
 
-        internal void Armazenar(CursoDto cursoDto)
-        {
-            Enum.TryParse(typeof(PublicoAlvo), cursoDto.PublicoAlvo, out var publicoAlvo);
-
-            if (publicoAlvo == null)
-                throw new ArgumentException("Público alvo innválido");
-
-            var curso = new Curso(cursoDto.Nome, cursoDto.Descricao, cursoDto.CargaHoraria, (PublicoAlvo)publicoAlvo, cursoDto.Valor);
-
-            _cursoRepositorio.Adicionar(curso);
+            Assert.Throws<ArgumentException>(() => _armazenadorCurso.Armazenar(_cursoDto))
+                .ComMensagem("Este curso já existe no banco de dados");
         }
     }
-
-    public class CursoDto
-    {
-        public string Nome { get; set; }
-        public string Descricao { get; set; }
-        public double CargaHoraria { get; set; }
-        public string PublicoAlvo { get; set; }
-        public double Valor { get; set; }
-    }
+  
+    } 
 }
