@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using CursoOnline.Domain.Cursos;
+using CursoOnline.DomainTest._Utils;
 using Moq;
 
 namespace CursoOnline.DomainTest.Cursos
@@ -19,7 +20,7 @@ namespace CursoOnline.DomainTest.Cursos
                 Nome = faker.Random.Word(),
                 Descricao = faker.Lorem.Paragraph(),
                 CargaHoraria = faker.Random.Double(50,100),
-                PublicoAlvo = PublicoAlvo.Empreendedor,
+                PublicoAlvo = "Empreendedor",
                 Valor = faker.Random.Double(500, 1000)
             };
 
@@ -41,6 +42,16 @@ namespace CursoOnline.DomainTest.Cursos
                 ), Times.AtLeast(1) // Verifica quantas vezes foi instanciado o objeto
             ); 
         }
+
+        [Fact]
+        public void DeveInformarPublicoAlvoInvalido()
+        {
+            var publicoAlvoInvalido = "Médico";
+            _cursoDto.PublicoAlvo = publicoAlvoInvalido;
+
+            Assert.Throws<ArgumentException>(() => _armazenadorCurso.Armazenar(_cursoDto))
+                .ComMensagem("Público alvo innválido");
+        }
     }
 
     public interface ICursoRepositorio
@@ -59,7 +70,12 @@ namespace CursoOnline.DomainTest.Cursos
 
         internal void Armazenar(CursoDto cursoDto)
         {
-            var curso = new Curso(cursoDto.Nome, cursoDto.Descricao, cursoDto.CargaHoraria, cursoDto.PublicoAlvo, cursoDto.Valor);
+            Enum.TryParse(typeof(PublicoAlvo), cursoDto.PublicoAlvo, out var publicoAlvo);
+
+            if (publicoAlvo == null)
+                throw new ArgumentException("Público alvo innválido");
+
+            var curso = new Curso(cursoDto.Nome, cursoDto.Descricao, cursoDto.CargaHoraria, (PublicoAlvo)publicoAlvo, cursoDto.Valor);
 
             _cursoRepositorio.Adicionar(curso);
         }
@@ -70,7 +86,7 @@ namespace CursoOnline.DomainTest.Cursos
         public string Nome { get; set; }
         public string Descricao { get; set; }
         public double CargaHoraria { get; set; }
-        public PublicoAlvo PublicoAlvo { get; set; }
+        public string PublicoAlvo { get; set; }
         public double Valor { get; set; }
     }
 }
